@@ -1,6 +1,7 @@
 package main
 
 import (
+	"sort"
 	"testing"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -297,9 +298,8 @@ func TestPostfixExporter_CollectFromLogline(t *testing.T) {
 func assertCounterEquals(t *testing.T, counter prometheus.Collector, expected int, message string) {
 
 	if counter != nil && expected > 0 {
-		switch counter.(type) {
+		switch counter := counter.(type) {
 		case *prometheus.CounterVec:
-			counter := counter.(*prometheus.CounterVec)
 			metricsChan := make(chan prometheus.Metric)
 			go func() {
 				counter.Collect(metricsChan)
@@ -308,7 +308,9 @@ func assertCounterEquals(t *testing.T, counter prometheus.Collector, expected in
 			var count int = 0
 			for metric := range metricsChan {
 				metricDto := io_prometheus_client.Metric{}
-				metric.Write(&metricDto)
+				if err := metric.Write(&metricDto); err != nil {
+					t.Fatalf("Failed to write metric: %v", err)
+				}
 				count += int(*metricDto.Counter.Value)
 			}
 			assert.Equal(t, expected, count, message)
@@ -321,7 +323,9 @@ func assertCounterEquals(t *testing.T, counter prometheus.Collector, expected in
 			var count int = 0
 			for metric := range metricsChan {
 				metricDto := io_prometheus_client.Metric{}
-				metric.Write(&metricDto)
+				if err := metric.Write(&metricDto); err != nil {
+					t.Fatalf("Failed to write metric: %v", err)
+				}
 				count += int(*metricDto.Counter.Value)
 			}
 			assert.Equal(t, expected, count, message)
@@ -340,9 +344,16 @@ func assertVecMetricsEquals(t *testing.T, counter *prometheus.CounterVec, expect
 		var res []string
 		for metric := range metricsChan {
 			metricDto := io_prometheus_client.Metric{}
-			metric.Write(&metricDto)
+			if err := metric.Write(&metricDto); err != nil {
+				t.Fatalf("Failed to write metric: %v", err)
+			}
 			res = append(res, metricDto.String())
 		}
-		assert.Equal(t, expected, res, message)
+		// Sort both slices to ensure consistent comparison regardless of metric collection order
+		sort.Strings(res)
+		expectedSorted := make([]string, len(expected))
+		copy(expectedSorted, expected)
+		sort.Strings(expectedSorted)
+		assert.Equal(t, expectedSorted, res, message)
 	}
 }
