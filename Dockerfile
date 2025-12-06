@@ -15,8 +15,12 @@ RUN go mod tidy
 ENV GO111MODULE=on
 RUN go build -o /bin/postfix_exporter
 
-FROM debian:latest
+ARG DEBIAN_RELEASE=bookworm
+FROM debian:${DEBIAN_RELEASE}-slim
+
 EXPOSE 9154
+
 WORKDIR /
+
 COPY --from=builder /bin/postfix_exporter /bin/
 ENTRYPOINT ["/bin/postfix_exporter"]
