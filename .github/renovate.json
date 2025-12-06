@@ -1,0 +1,22 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":automergeAll"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update GOSU_VERSION in Dockerfiles",
+      "managerFilePatterns": [
+        "/(^|/)Dockerfile$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)( versioning=(?<versioning>\\S+))?( extractVersion=(?<extractVersion>\\S+))?\\s+ARG \\S+_VERSION=(?<currentValue>\\S+)"
+      ]
+    }
+  ],
+  "git-submodules": {
+    "enabled": true
+  }
+}
