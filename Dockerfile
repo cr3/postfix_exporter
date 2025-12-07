@@ -1,26 +1,18 @@
 FROM golang:1.23 AS builder
 WORKDIR /src
 
-# avoid downloading the dependencies on succesive builds
-RUN apt-get update -qq && apt-get install -qqy \
-  build-essential \
-  libsystemd-dev
-
 COPY go.mod ./
 RUN go mod download
-COPY . .
+COPY . ./
 RUN go mod tidy
 
-# Force the go compiler to use modules
-ENV GO111MODULE=on
-RUN go build -o /bin/postfix_exporter
+# Build static binary with systemd support disabled (nosystemd build tag)
+RUN CGO_ENABLED=0 GOOS=linux go build -a -tags nosystemd -installsuffix nocgo -o /bin/postfix_exporter
 
-ARG DEBIAN_RELEASE=bookworm
-FROM debian:${DEBIAN_RELEASE}-slim
+FROM scratch
 
 EXPOSE 9154
 
-WORKDIR /
-
 COPY --from=builder /bin/postfix_exporter /bin/
+
 ENTRYPOINT ["/bin/postfix_exporter"]
