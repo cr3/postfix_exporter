@@ -3,7 +3,7 @@ module github.com/cr3/postfix_exporter
 go 1.23.0
 
 require (
-	github.com/alecthomas/kingpin v2.2.6+incompatible
+	github.com/alecthomas/kingpin v2.4.0+incompatible
 	github.com/coreos/go-systemd/v22 v22.0.0
 	github.com/docker/docker v27.3.1+incompatible
 	github.com/nxadm/tail v1.4.11
