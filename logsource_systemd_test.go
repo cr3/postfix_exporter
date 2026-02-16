@@ -37,7 +37,7 @@ func TestSystemdLogSource_Path(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewSystemdLogSource failed: %v", err)
 	}
-	defer src.Close()
+	defer func() { _ = src.Close() }()
 
 	assert.Equal(t, "apath", src.Path(), "Path should be set by New.")
 }
@@ -63,7 +63,7 @@ func TestSystemdLogSource_Read(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewSystemdLogSource failed: %v", err)
 	}
-	defer src.Close()
+	defer func() { _ = src.Close() }()
 
 	s, err := src.Read(ctx)
 	if err != nil {
@@ -82,7 +82,7 @@ func TestSystemdLogSource_ReadEOF(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewSystemdLogSource failed: %v", err)
 	}
-	defer src.Close()
+	defer func() { _ = src.Close() }()
 
 	_, err = src.Read(ctx)
 	assert.Equal(t, io.EOF, err, "Should interpret Next 0 as EOF.")
@@ -90,7 +90,7 @@ func TestSystemdLogSource_ReadEOF(t *testing.T) {
 
 func TestMain(m *testing.M) {
 	// We compare Unix timestamps to date strings, so make it deterministic.
-	os.Setenv("TZ", "UTC")
+	_ = os.Setenv("TZ", "UTC")
 	timeNow = func() time.Time { return time.Date(2009, 2, 13, 23, 31, 30, 0, time.UTC) }
 	defer func() {
 		timeNow = time.Now

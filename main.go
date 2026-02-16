@@ -28,7 +28,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error opening log source: %s", err)
 	}
-	defer logSrc.Close()
+	defer func() { _ = logSrc.Close() }()
 
 	exporter, err := NewPostfixExporter(
 		*postfixShowqPath,

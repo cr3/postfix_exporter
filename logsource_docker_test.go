@@ -36,7 +36,7 @@ func TestDockerLogSource_Path(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDockerLogSource failed: %v", err)
 	}
-	defer src.Close()
+	defer func() { _ = src.Close() }()
 
 	assert.Equal(t, "docker:acontainer", src.Path(), "Path should be set by New.")
 }
@@ -51,7 +51,7 @@ func TestDockerLogSource_Read(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDockerLogSource failed: %v", err)
 	}
-	defer src.Close()
+	defer func() { _ = src.Close() }()
 
 	s, err := src.Read(ctx)
 	if err != nil {

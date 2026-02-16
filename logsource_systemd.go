@@ -47,18 +47,18 @@ func NewSystemdLogSource(j SystemdJournal, path, unit, slice string) (*SystemdLo
 		err = logSrc.journal.AddMatch("_SYSTEMD_UNIT=" + unit)
 	}
 	if err != nil {
-		logSrc.journal.Close()
+		_ = logSrc.journal.Close()
 		return nil, err
 	}
 
 	// Start at end of journal
 	if err := logSrc.journal.SeekRealtimeUsec(uint64(timeNow().UnixNano() / 1000)); err != nil {
-		logSrc.journal.Close()
+		_ = logSrc.journal.Close()
 		return nil, err
 	}
 
 	if r := logSrc.journal.Wait(1 * time.Second); r < 0 {
-		logSrc.journal.Close()
+		_ = logSrc.journal.Close()
 		return nil, err
 	}
 
