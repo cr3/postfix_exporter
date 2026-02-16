@@ -305,7 +305,7 @@ func assertCounterEquals(t *testing.T, counter prometheus.Collector, expected in
 				counter.Collect(metricsChan)
 				close(metricsChan)
 			}()
-			var count int = 0
+			var count = 0
 			for metric := range metricsChan {
 				metricDto := io_prometheus_client.Metric{}
 				if err := metric.Write(&metricDto); err != nil {
@@ -320,7 +320,7 @@ func assertCounterEquals(t *testing.T, counter prometheus.Collector, expected in
 				counter.Collect(metricsChan)
 				close(metricsChan)
 			}()
-			var count int = 0
+			var count = 0
 			for metric := range metricsChan {
 				metricDto := io_prometheus_client.Metric{}
 				if err := metric.Write(&metricDto); err != nil {

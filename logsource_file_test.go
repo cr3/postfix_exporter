@@ -22,7 +22,7 @@ func TestFileLogSource_Path(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewFileLogSource failed: %v", err)
 	}
-	defer src.Close()
+	defer func() { _ = src.Close() }()
 
 	assert.Equal(t, path, src.Path(), "Path should be set by New.")
 }
@@ -40,7 +40,7 @@ func TestFileLogSource_Read(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewFileLogSource failed: %v", err)
 	}
-	defer src.Close()
+	defer func() { _ = src.Close() }()
 
 	s, err := src.Read(ctx)
 	if err != nil {
@@ -61,14 +61,14 @@ func setupFakeLogFile() (string, func(), error) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		defer os.Remove(f.Name())
-		defer f.Close()
+		defer func() { _ = os.Remove(f.Name()) }()
+		defer func() { _ = f.Close() }()
 
 		for {
 			// The tailer seeks to the end and then does a
 			// follow. Keep writing lines so we know it wakes up and
 			// returns lines.
-			fmt.Fprintln(f, "Feb 13 23:31:30 ahost anid[123]: aline")
+			_, _ = fmt.Fprintln(f, "Feb 13 23:31:30 ahost anid[123]: aline")
 
 			select {
 			case <-time.After(10 * time.Millisecond):
