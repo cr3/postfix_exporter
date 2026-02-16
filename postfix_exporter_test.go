@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"sort"
 	"testing"
 
@@ -347,7 +348,7 @@ func assertVecMetricsEquals(t *testing.T, counter *prometheus.CounterVec, expect
 			if err := metric.Write(&metricDto); err != nil {
 				t.Fatalf("Failed to write metric: %v", err)
 			}
-			res = append(res, metricDto.String())
+			res = append(res, metricString(&metricDto))
 		}
 		// Sort both slices to ensure consistent comparison regardless of metric collection order
 		sort.Strings(res)
@@ -356,4 +357,15 @@ func assertVecMetricsEquals(t *testing.T, counter *prometheus.CounterVec, expect
 		sort.Strings(expectedSorted)
 		assert.Equal(t, expectedSorted, res, message)
 	}
+}
+
+// metricString builds a deterministic string representation of a metric
+// that doesn't depend on the protobuf library's String() format.
+func metricString(m *io_prometheus_client.Metric) string {
+	var s string
+	for _, label := range m.Label {
+		s += fmt.Sprintf(`label:<name:%q value:%q > `, label.GetName(), label.GetValue())
+	}
+	s += fmt.Sprintf(`counter:<value:%g > `, m.Counter.GetValue())
+	return s
 }
